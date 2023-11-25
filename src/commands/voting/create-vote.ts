@@ -1,29 +1,20 @@
-import {
-    SlashCommandBuilder,
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
-    EmbedBuilder,
-    ComponentType,
-    ButtonInteraction,
-    ChatInputCommandInteraction,
-    userMention,
-    User,
-} from 'discord.js';
-import { choiceArray, Poll, polls, runPoll } from '../../src/utils/polls';
+import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
+import { choiceArray, Ids, runPoll } from '../../polls';
 
 export const data = new SlashCommandBuilder()
     .setName("create-vote")
     .setDescription("Create a new vote")
     .addStringOption(option =>
         option
-            .setName("question")
+            .setName(Ids.Question)
             .setDescription("What are you voting on")
             .setRequired(true)
     );
 
 for (let i = 0; i < choiceArray.length; i++) {
-    data.addStringOption(option => option.setName(choiceArray[i]).setDescription("An option to vote on"));
+    data.addStringOption(option => option.setName(choiceArray[i])
+        .setDescription("An option to vote on")
+        .setRequired(i < 2));
 }
 
 export const execute = async (interaction: ChatInputCommandInteraction) => {
@@ -37,7 +28,7 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
         }
     }
 
-    const question = interaction.options.getString("question") as string;
+    const question = interaction.options.getString(Ids.Question) as string;
     const user = interaction.user;
     await runPoll(interaction, question, user, choices);
 };

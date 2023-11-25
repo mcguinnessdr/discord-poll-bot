@@ -1,9 +1,8 @@
 // Require the necessary discord.js classes
 import { Client, Collection, Events, GatewayIntentBits } from 'discord.js';
-const { token } = require('./config.json');
+const { token } = require('../config.json');
 import fs from 'node:fs';
 import path from 'node:path';
-import { polls } from './src/utils/polls';
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -47,31 +46,6 @@ client.on(Events.InteractionCreate, async interaction => {
 			}
 		}
 	}
-	else if (interaction.isButton()) {
-		// const command = interaction.client.commands.get("vote");
-
-		// if (!command) {
-		// 	console.error(`No command matching ${interaction.customId} was found.`);
-		// 	return;
-		// }
-
-		// try {
-		// 	await command.execute(interaction);
-		// } catch (error) {
-		// 	console.error(error);
-		// 	if (interaction.replied || interaction.deferred) {
-		// 		await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
-		// 	} else {
-		// 		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-		// 	}
-		// }
-	}
-	else if (interaction.isStringSelectMenu()) {
-		console.log(interaction.values)
-		await interaction.reply({ content: "test", ephemeral: true })
-		await interaction.followUp({ content: "test2", ephemeral: true })
-	}
-
 });
 
 // When the client is ready, run this code (only once)

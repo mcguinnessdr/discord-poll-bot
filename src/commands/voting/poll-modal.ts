@@ -1,6 +1,6 @@
 import { ModalBuilder, TextInputBuilder } from "@discordjs/builders";
 import { ActionRowBuilder, ChatInputCommandInteraction, SlashCommandBuilder, TextInputStyle } from "discord.js";
-import { choiceArray, runPoll } from "../../src/utils/polls";
+import { Ids, choiceArray, runPoll } from "../../polls";
 
 export const data = new SlashCommandBuilder()
     .setName("poll-modal")
@@ -12,10 +12,10 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
         .setTitle("Create Poll");
 
     const questionInput = new TextInputBuilder()
-        .setCustomId("question")
+        .setCustomId(Ids.Question)
         .setLabel("Question")
         .setStyle(TextInputStyle.Short);
-    
+
     const trimmedChoiceArray = choiceArray.toSpliced(4, choiceArray.length - 4);
 
     const choiceFields = trimmedChoiceArray.map((x, i) => new ActionRowBuilder<TextInputBuilder>()
@@ -30,7 +30,7 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
 
     await interaction.showModal(modal);
     const modalSubmit = await interaction.awaitModalSubmit({ time: 360_000 });
-    const question = modalSubmit.fields.getTextInputValue("question");
+    const question = modalSubmit.fields.getTextInputValue(Ids.Question);
     const user = interaction.user;
     const choices: string[] = [];
 
@@ -41,8 +41,6 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
             choices.push(choice);
         }
     }
-
-    console.log(choices)
 
     await runPoll(modalSubmit, question, user, choices);
 };

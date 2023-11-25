@@ -1,5 +1,4 @@
 import {
-    SlashCommandBuilder,
     ActionRowBuilder,
     ButtonBuilder,
     ButtonStyle,
@@ -9,10 +8,9 @@ import {
     ChatInputCommandInteraction,
     userMention,
     User,
-    Interaction,
     ModalSubmitInteraction,
 } from 'discord.js';
-const { choiceCount } = require("../../config.json");
+const { choiceCount } = require("../config.json");
 
 export type Poll =
     {
@@ -32,6 +30,12 @@ export type Vote =
 
 export const polls: { [id: string]: Poll | undefined } = {};
 
+export enum Ids {
+    Question = "question",
+    Vote = "vote",
+    Close = "close",
+};
+
 export const choiceArray: string[] = [];
 for (let i = 0; i < choiceCount; i++) {
     choiceArray[i] = `choice-${i + 1}`;
@@ -41,11 +45,11 @@ export const runPoll = async (interaction: ChatInputCommandInteraction | ModalSu
     const row = new ActionRowBuilder<ButtonBuilder>()
     row.addComponents(
         new ButtonBuilder()
-            .setCustomId("vote")
+            .setCustomId(Ids.Vote)
             .setLabel("Vote")
             .setStyle(ButtonStyle.Primary),
         new ButtonBuilder()
-            .setCustomId("close")
+            .setCustomId(Ids.Close)
             .setLabel("Close")
             .setStyle(ButtonStyle.Secondary),
     );
@@ -60,27 +64,25 @@ export const runPoll = async (interaction: ChatInputCommandInteraction | ModalSu
         winner: "",
     }
     polls[pollUuid] = currentPoll;
-let response;
-    if (interaction.replied)
-{
-    response = await interaction.followUp({
-        embeds: [buildEmbed(currentPoll)],
-        components: [row],
-        fetchReply: true,
-    });
-} else {
-    response = await interaction.reply({
-        embeds: [buildEmbed(currentPoll)],
-        components: [row],
-        fetchReply: true,
-    });
-}
-
+    let response;
+    if (interaction.replied) {
+        response = await interaction.followUp({
+            embeds: [buildEmbed(currentPoll)],
+            components: [row],
+            fetchReply: true,
+        });
+    } else {
+        response = await interaction.reply({
+            embeds: [buildEmbed(currentPoll)],
+            components: [row],
+            fetchReply: true,
+        });
+    }
 
     const collector = response.createMessageComponentCollector({ componentType: ComponentType.Button, time: 604_800_000 })
     collector.on("collect", async (i: ButtonInteraction) => {
         const userId = i.member?.user.id as string;
-        if (i.customId !== "vote") {
+        if (i.customId !== Ids.Vote) {
             if (i.member?.user.id !== currentPoll.author.id) {
                 i.reply({ content: "only the owner can close a poll", ephemeral: true });
                 return;
@@ -138,7 +140,7 @@ const sendNextVotePrompt = async (i: ButtonInteraction, currentPoll: Poll): Prom
         fetchReply: true,
     }
 
-    if (i.customId === "vote") {
+    if (i.customId === Ids.Vote) {
         response = await i.reply({
             ...reply,
             ephemeral: true,
